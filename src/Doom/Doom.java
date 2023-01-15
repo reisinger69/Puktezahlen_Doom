@@ -7,7 +7,14 @@ import java.util.Scanner;
 public class Doom {
 
     int positionOfPlayer = playfield.indexOf('@');
-    final int WIDTH = 40;
+    final int WIDTH = 41;
+
+    int enemy1 = 182;
+    int enemy2 = 283;
+    int enemy3 = 310;
+    int enemy4 = 363;
+    int enemy5 = 372;
+    int enemy6 = 434;
 
     static String playfield = """
             ########################################
@@ -35,7 +42,11 @@ public class Doom {
         }
     }
 
-    public void movePlayer(Move move) {
+    private void moveEnemy() {
+
+    }
+
+    private void movePlayer(Move move) {
         switch (move) {
             case LEFT -> {
                 if (playfield.charAt(positionOfPlayer-1) == '#') {
@@ -57,6 +68,28 @@ public class Doom {
                 sb.setCharAt(positionOfPlayer, ' ');
                 sb.setCharAt(positionOfPlayer+1, '@');
                 positionOfPlayer++;
+                playfield = sb.toString();
+            }
+            case FORWARD -> {
+                if (playfield.charAt(positionOfPlayer-WIDTH) == '#') {
+                    System.out.println("Hier geht es nicht weiter"); // Wand gefunden
+                    return;
+                }
+                StringBuilder sb = new StringBuilder(playfield);
+                sb.setCharAt(positionOfPlayer, ' ');
+                sb.setCharAt(positionOfPlayer-WIDTH, '@');
+                positionOfPlayer-=WIDTH;
+                playfield = sb.toString();
+            }
+            case BACKWARD -> {
+                if (playfield.charAt(positionOfPlayer+WIDTH) == '#') {
+                    System.out.println("Hier geht es nicht weiter"); // Wand gefunden
+                    return;
+                }
+                StringBuilder sb = new StringBuilder(playfield);
+                sb.setCharAt(positionOfPlayer, ' ');
+                sb.setCharAt(positionOfPlayer+WIDTH, '@');
+                positionOfPlayer+=WIDTH;
                 playfield = sb.toString();
             }
 
