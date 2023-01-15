@@ -39,11 +39,67 @@ public class Doom {
         while (true) {
             System.out.println(playfield);
             movePlayer(getInput());
+            moveAllEnemys();
         }
     }
 
-    private void moveEnemy() {
+    private void moveAllEnemys() {
+        System.out.println(enemy1);
+        enemy1 = moveEnemy(enemy1);
+        enemy2 = moveEnemy(enemy2);
+        enemy3 = moveEnemy(enemy3);
+        enemy4 = moveEnemy(enemy4);
+        enemy5 = moveEnemy(enemy5);
+        enemy6 = moveEnemy(enemy6);
 
+    }
+
+    private int moveEnemy(int enemy) {
+        StringBuilder field = new StringBuilder(playfield);
+        int move = (int)(Math.random() * 4) + 1;
+        switch (move) {
+            case 1 -> {
+                if (playfield.charAt(enemy-1) == '#') {
+                    return moveEnemy(enemy);
+                } else {
+                    field.setCharAt(enemy, ' ');
+                    field.setCharAt(enemy - 1, 'X');
+                    playfield = field.toString();
+                    return enemy-1;
+                }
+            }
+            case 2 -> {
+                if (playfield.charAt(enemy+1) == '#') {
+                    return moveEnemy(enemy);
+                } else {
+                    field.setCharAt(enemy, ' ');
+                    field.setCharAt(enemy + 1, 'X');
+                    playfield = field.toString();
+                    return enemy+1;
+                }
+            }
+            case 3 -> {
+                if (playfield.charAt(enemy-41) == '#') {
+                    return moveEnemy(enemy);
+                } else {
+                    field.setCharAt(enemy, ' ');
+                    field.setCharAt(enemy - 41, 'X');
+                    playfield = field.toString();
+                    return enemy - 41;
+                }
+            }
+            case 4 -> {
+                if (playfield.charAt(enemy+41) == '#') {
+                    return moveEnemy(enemy);
+                } else {
+                    field.setCharAt(enemy, ' ');
+                    field.setCharAt(enemy + 41, 'X');
+                    playfield = field.toString();
+                    return enemy + 41;
+                }
+            }
+        }
+        return enemy;
     }
 
     private void movePlayer(Move move) {
@@ -95,8 +151,6 @@ public class Doom {
 
         }
     }
-
-
 
     private Move getInput() {
         Scanner s = new Scanner(System.in);
