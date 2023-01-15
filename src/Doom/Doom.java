@@ -105,7 +105,7 @@ public class Doom {
     private void movePlayer(Move move) {
         switch (move) {
             case LEFT -> {
-                if (playfield.charAt(positionOfPlayer-1) == '#') {
+                if (playfield.charAt(positionOfPlayer-1) == '#' || playfield.charAt(positionOfPlayer-1) == '@' || playfield.charAt(positionOfPlayer-1) == 'S') {
                     System.out.println("Hier geht es nicht weiter"); // Wand gefunden
                     return;
                 }
@@ -116,7 +116,7 @@ public class Doom {
                 playfield = sb.toString();
             }
             case RIGHT -> {
-                if (playfield.charAt(positionOfPlayer+1) == '#') {
+                if (playfield.charAt(positionOfPlayer+1) == '#' || playfield.charAt(positionOfPlayer-1) == '@' || playfield.charAt(positionOfPlayer-1) == 'S') {
                     System.out.println("Hier geht es nicht weiter"); // Wand gefunden
                     return;
                 }
@@ -127,7 +127,7 @@ public class Doom {
                 playfield = sb.toString();
             }
             case FORWARD -> {
-                if (playfield.charAt(positionOfPlayer-WIDTH) == '#') {
+                if (playfield.charAt(positionOfPlayer-WIDTH) == '#' || playfield.charAt(positionOfPlayer-1) == '@' || playfield.charAt(positionOfPlayer-1) == 'S') {
                     System.out.println("Hier geht es nicht weiter"); // Wand gefunden
                     return;
                 }
@@ -138,7 +138,7 @@ public class Doom {
                 playfield = sb.toString();
             }
             case BACKWARD -> {
-                if (playfield.charAt(positionOfPlayer+WIDTH) == '#') {
+                if (playfield.charAt(positionOfPlayer+WIDTH) == '#' || playfield.charAt(positionOfPlayer-1) == '@' || playfield.charAt(positionOfPlayer-1) == 'S') {
                     System.out.println("Hier geht es nicht weiter"); // Wand gefunden
                     return;
                 }
