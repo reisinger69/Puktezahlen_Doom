@@ -1,7 +1,9 @@
 package Doom;
 
+import Doom.Recources.Enemy;
 import Doom.Recources.Move;
 
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -12,12 +14,14 @@ public class Doom {
 
     int playerLives = 3;
 
-    int enemy1 = 182;
-    int enemy2 = 283;
-    int enemy3 = 310;
-    int enemy4 = 363;
-    int enemy5 = 372;
-    int enemy6 = 434;
+    ArrayList<Integer> enemys = new ArrayList<>();
+
+    final int enemy1 = 182;
+    final int enemy2 = 283;
+    final int enemy3 = 310;
+    final int enemy4 = 363;
+    final int enemy5 = 372;
+    final int enemy6 = 434;
 
     static String playfield = """
             ########################################
@@ -39,8 +43,16 @@ public class Doom {
             """;
 
     public void play() {
+        enemys.add(enemy1);
+        enemys.add(enemy2);
+        enemys.add(enemy3);
+        enemys.add(enemy4);
+        enemys.add(enemy5);
+        enemys.add(enemy6);
+
         while (true) {
             System.out.println(playfield);
+            System.out.println("Aktuelle Lebensanzahl: " + playerLives);
             if(movePlayer(getInput())){
                 break;
             }
@@ -51,8 +63,16 @@ public class Doom {
                     System.exit(0);
                 }
             }
-            checkForFight();
-            moveAllEnemys();
+                moveAllEnemys();
+            System.out.println("Enemy Move: ");
+            System.out.println(playfield);
+            if (!checkForFight())  {
+                playerLives--;
+                if (playerLives == 0) {
+                    System.out.println("You Loose!");
+                    System.exit(0);
+                }
+            }
         }
 
         System.out.println("You win!");
@@ -61,18 +81,23 @@ public class Doom {
     private boolean checkForFight() { //retursn true when player wins a fight or of there is no enemy
         if (playfield.charAt(positionOfPlayer-1) == 'X') {
             return fight(positionOfPlayer-1);
+
         } else if(playfield.charAt(positionOfPlayer+1) == 'X') {
             return fight(positionOfPlayer+1);
+
         } else if(playfield.charAt(positionOfPlayer+41) == 'X') {
             return fight(positionOfPlayer+41);
+
         } else if(playfield.charAt(positionOfPlayer-41) == 'X') {
             return fight(positionOfPlayer-41);
+
         } else {
             return true;
         }
     }
 
     private boolean fight(int positionOfEnemy) {
+        System.out.println("Fight!");
         StringBuilder sb = new StringBuilder(playfield);
         Random rand = new Random();
         int randomNum = rand.nextInt(5) + 1;
@@ -87,9 +112,12 @@ public class Doom {
                     if (guess == randomNum) {
                         sb.setCharAt(positionOfEnemy, ' ');
                         playfield = sb.toString();
+                        enemys.set(enemys.indexOf(positionOfEnemy), 0);
+                        System.out.println("Right number!");
                         return true;
                     }
                     tries++;
+                    System.out.println("Wrong number. Trys left: " + (3-tries));
                 }else{
                     System.out.println("Invalid input, please enter a number between 1 and 5");
                 }
@@ -103,13 +131,9 @@ public class Doom {
 
     private void moveAllEnemys() {
         System.out.println(enemy1);
-        enemy1 = moveEnemy(enemy1);
-        enemy2 = moveEnemy(enemy2);
-        enemy3 = moveEnemy(enemy3);
-        enemy4 = moveEnemy(enemy4);
-        enemy5 = moveEnemy(enemy5);
-        enemy6 = moveEnemy(enemy6);
-
+        for (int i = 0; i < enemys.size(); i++) {
+            enemys.set(i, moveEnemy(enemys.get(i)));
+        }
     }
 
     private int moveEnemy(int enemy) {
