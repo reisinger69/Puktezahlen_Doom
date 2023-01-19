@@ -4,6 +4,7 @@ import Doom.Recources.Enemy;
 import Doom.Recources.Move;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -53,6 +54,7 @@ public class Doom {
         while (true) {
             System.out.println(playfield);
             System.out.println("Aktuelle Lebensanzahl: " + playerLives);
+            printMenu();
             if(movePlayer(getInput())){
                 break;
             }
@@ -76,6 +78,16 @@ public class Doom {
         }
 
         System.out.println("You win!");
+    }
+
+    private void printMenu() {
+        String menu = """
+                FORWARD     => goes one field Richtung Nie
+                RIGHT       => goes one field Richtung Ohne
+                BACKWARD    => goes one field Richtung Seife
+                LEFT        => goes one field Richtung Waschen
+                """;
+        System.out.println(menu);
     }
 
     private boolean checkForFight() { //retursn true when player wins a fight or of there is no enemy
@@ -253,7 +265,7 @@ public class Doom {
         while(true) {
             String input = s.nextLine();
             try {
-                return Move.valueOf(input);
+                return Move.valueOf(input.toUpperCase());
             }catch (IllegalArgumentException e) {
                 System.out.println("Ungültige Eingabe. Versuchen Sie es erneut");
             }
