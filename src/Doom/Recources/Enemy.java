@@ -1,12 +1,14 @@
 package Doom.Recources;
 
-public class Enemy {
+public sealed class Enemy permits Dwarf, ELF, Rouge, Wizard {
     int position;
     boolean dead;
+    char sign;
 
-    public Enemy(int position, boolean dead) {
+    public Enemy(int position, boolean dead, char sign) {
         this.position = position;
         this.dead = dead;
+        this.sign = sign;
     }
 
     public int getPosition() {

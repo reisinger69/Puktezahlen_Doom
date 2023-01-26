@@ -1,8 +1,12 @@
 package reisinger.htl;
 
+import Doom.Recources.Rouge;
+import Doom.Recources.Wizard;
+
 public class Main {
 
     public static void main(String[] args) {
+
 
         for (double i = 0; i <= 120; i+=0.5) {
             System.out.println(i + ": " + calculateGrade(i));
