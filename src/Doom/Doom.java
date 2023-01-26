@@ -1,10 +1,10 @@
 package Doom;
 
-import Doom.Recources.Enemy;
+import Doom.Recources.Enemy.*;
 import Doom.Recources.Move;
+import Doom.Recources.Weapon.*;
 
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -13,29 +13,23 @@ public class Doom {
     int positionOfPlayer = playfield.indexOf('@');
     final int WIDTH = 41;
 
-    int playerLives = 3;
+    int playerLives = 100;
 
-    ArrayList<Integer> enemys = new ArrayList<>();
+    ArrayList<Enemy> enemys = new ArrayList<>();
 
-    final int enemy1 = 182;
-    final int enemy2 = 283;
-    final int enemy3 = 310;
-    final int enemy4 = 363;
-    final int enemy5 = 372;
-    final int enemy6 = 434;
 
     static String playfield = """
             ########################################
             #  #  # #     # #    ###     ###       #
             #  #  # #     # #    ###     ###       #
             #  #  # #     # #    ###     ###       #
-            #  #  # ####### # X  ########### S     #
+            #  #  # ####### #    ########### S     #
             #  #  #         #    #         #       #
-            ####  #         #    ###########     X #
-            #     #         #      X               #
-            #     ###########                  X   #
-            #  X              ######  ##########   #
-            #     ##########  #    #X #        #   #
+            ####  #         #    ###########       #
+            #     #         #                      #
+            #     ###########                      #
+            #                 ######  ##########   #
+            #     ##########  #    #  #        #   #
             #     #        #  #    #  #        #   #
             #     #        #  #    #  #        #   #
             #     #        #  #    #  #        #   #
@@ -44,41 +38,46 @@ public class Doom {
             """;
 
     public void play() {
-        enemys.add(enemy1);
-        enemys.add(enemy2);
-        enemys.add(enemy3);
-        enemys.add(enemy4);
-        enemys.add(enemy5);
-        enemys.add(enemy6);
+        enemys.add(new Dwarf(182, false, 'D'));
+        enemys.add(new ELF(283, false, 'E'));
+        enemys.add(new Rouge(310, false, 'R'));
+        enemys.add(new HardWizard(363, false, 'H'));
+        enemys.add(new UndeadWizard(372, false, 'U'));
+
+        String infomessage = """
+                Dein Ziel ist es zum Schatz zu kommen(S).
+                Vermeide Kontakt mit Gegnern: Diese besitzen 4 Lebenspunkte und verursachen verschieden viel Schaden.
+                Um die Gegner zu besiegen kannst du zwischen 4 Waffen entscheiden. Je nach Waffe kommt eine unterschiedlich schwierige Matheaufgabe.
+                Wenn du diese löst werden dem Gegner entsprechend viele Leben abgezogen.
+                Danach ist der Gegner am Zug und fügt dir Schaden zu(außer du besiegst ihn vorher).
+                Löst du eine Matheaufgabe nicht korrekt verlierst du sofort! 
+                (beim Dividieren wird immer abgerundet auf ganze Zahlen!)""";
+
+        System.out.println(infomessage);
+        System.out.println(playfield);
 
         while (true) {
-            System.out.println(playfield);
             System.out.println("Aktuelle Lebensanzahl: " + playerLives);
             printMenu();
             if(movePlayer(getInput())){
                 break;
             }
-            if (!checkForFight())  {
-                playerLives--;
-                if (playerLives == 0) {
-                    System.out.println("You Loose!");
-                    System.exit(0);
-                }
-            }
-                moveAllEnemys();
-            System.out.println("Enemy Move: ");
             System.out.println(playfield);
             if (!checkForFight())  {
-                playerLives--;
-                if (playerLives == 0) {
                     System.out.println("You Loose!");
                     System.exit(0);
-                }
+            }
+                moveAllEnemys();
+            System.out.println(playfield);
+            if (!checkForFight())  {
+                    System.out.println("You Loose!");
+                    System.exit(0);
             }
         }
 
         System.out.println("You win!");
     }
+
 
     private void printMenu() {
         String menu = """
@@ -91,24 +90,75 @@ public class Doom {
     }
 
     private boolean checkForFight() { //retursn true when player wins a fight or of there is no enemy
-        if (playfield.charAt(positionOfPlayer-1) == 'X') {
-            return fight(positionOfPlayer-1);
-
-        } else if(playfield.charAt(positionOfPlayer+1) == 'X') {
-            return fight(positionOfPlayer+1);
-
-        } else if(playfield.charAt(positionOfPlayer+41) == 'X') {
-            return fight(positionOfPlayer+41);
-
-        } else if(playfield.charAt(positionOfPlayer-41) == 'X') {
-            return fight(positionOfPlayer-41);
-
-        } else {
-            return true;
+        for (int i = 0; i < enemys.size(); i++) {
+            if (!enemys.get(i).isDead()) {
+                if (playfield.charAt(enemys.get(i).getPosition() - 1) == '@' || playfield.charAt(enemys.get(i).getPosition() + 1) == '@' || playfield.charAt(enemys.get(i).getPosition() - 41) == '@' || playfield.charAt(enemys.get(i).getPosition() + 41) == '@') {
+                    System.out.println(enemys.get(i));
+                    return fight(i);
+                }
+            }
         }
+        return true;
     }
 
-    private boolean fight(int positionOfEnemy) {
+    private boolean fight(int positionOfEnemyInArray) {
+        StringBuilder sb = new StringBuilder(playfield);
+        Enemy e = enemys.get(positionOfEnemyInArray);
+        Weapon weapon;
+        while (true) {
+            weapon = getWeaponToUse();
+            if (weapon == null) {
+                System.out.println("Falsche Eingabe. Du verlierst!");
+                return false;
+            }
+            if (weapon.fight()) {
+                e.reduceLives(weapon.getDamage());
+                if (e.isDead()) {
+                    e.setDead(true);
+                    sb.setCharAt(e.getPosition(), ' ');
+                    playfield = sb.toString();
+                    System.out.println("Sehr gut! Du hast den Gegner besiegt!");
+                    break;
+                }
+                System.out.println("Der Gegner hat jetzt noch " + e.getLives() + " Leben");
+                System.out.println();
+                System.out.println("Der Gegner hat dir " + e.getDamage() + " Schaden zugefügt!");
+                playerLives-=e.getDamage();
+                System.out.println("Aktuelle Leben: " + playerLives);
+                if (playerLives <= 0) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        System.out.println(playfield);
+        return true;
+    }
+
+    private Weapon getWeaponToUse() {
+        Scanner sc =new Scanner(System.in);
+        System.out.println("Welche Waffe Wollen sie nutzen?");
+        System.out.println("1 - Quotienten-Zepter (-4 Leben)");
+        System.out.println("2 - Faktoren-Speer (-3 Leben)" );
+        System.out.println("3 - Subtrahenden-Schwert (-2 Leben)");
+        System.out.println("4 - Summanden-Dolch (-1 Leben)");
+        int input = 0;
+        try {
+            input = Integer.parseInt(sc.nextLine());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        return switch (input) {
+            case 1 -> new QuotientenZepter();
+            case 2 -> new Faktorenspeer();
+            case 3 -> new Subtrahendenschwert();
+            case 4 -> new Summandendolch();
+            default -> null;
+        };
+    }
+
+    /*private boolean fight(int positionOfEnemy) {
         System.out.println("Fight!");
         StringBuilder sb = new StringBuilder(playfield);
         Random rand = new Random();
@@ -124,7 +174,7 @@ public class Doom {
                     if (guess == randomNum) {
                         sb.setCharAt(positionOfEnemy, ' ');
                         playfield = sb.toString();
-                        enemys.set(enemys.indexOf(positionOfEnemy), 0);
+                        enemys.get(enemys.indexOf(positionOfEnemy)).setDead(true);
                         System.out.println("Right number!");
                         return true;
                     }
@@ -139,69 +189,68 @@ public class Doom {
             }
         }
         return false;
-    }
+    } */
 
     private void moveAllEnemys() {
-        System.out.println(enemy1);
-        for (int i = 0; i < enemys.size(); i++) {
-            enemys.set(i, moveEnemy(enemys.get(i)));
+        for (Enemy enemy : enemys) {
+            enemy.setPosition(moveEnemy(enemy));
         }
     }
 
-    private int moveEnemy(int enemy) {
+    private int moveEnemy(Enemy enemy) {
         StringBuilder field = new StringBuilder(playfield);
-        int move = (int)(Math.random() * 4) + 1;
+        int move = (int) (Math.random() * 4) + 1;
         switch (move) {
             case 1 -> {
-                if (enemy == 0) {
+                if (enemy.isDead()) {
                     return 0;
-                } else if (playfield.charAt(enemy-1) == '#'  || playfield.charAt(enemy-1) == '@' || playfield.charAt(enemy-1) == 'S') {
+                } else if (playfield.charAt(enemy.getPosition() - 1) == '#' || playfield.charAt(enemy.getPosition() - 1) == '@' || playfield.charAt(enemy.getPosition() - 1) == 'S') {
                     return moveEnemy(enemy);
                 } else {
-                    field.setCharAt(enemy, ' ');
-                    field.setCharAt(enemy - 1, 'X');
+                    field.setCharAt(enemy.getPosition(), ' ');
+                    field.setCharAt(enemy.getPosition() - 1, enemy.getSign());
                     playfield = field.toString();
-                    return enemy-1;
+                    return enemy.getPosition() - 1;
                 }
             }
             case 2 -> {
-                if (enemy == 0) {
+                if (enemy.isDead()) {
                     return 0;
-                } else if (playfield.charAt(enemy+1) == '#' || playfield.charAt(enemy+1) == '@' || playfield.charAt(enemy+1) == 'S') {
+                } else if (playfield.charAt(enemy.getPosition() + 1) == '#' || playfield.charAt(enemy.getPosition() + 1) == '@' || playfield.charAt(enemy.getPosition() + 1) == 'S') {
                     return moveEnemy(enemy);
                 } else {
-                    field.setCharAt(enemy, ' ');
-                    field.setCharAt(enemy + 1, 'X');
+                    field.setCharAt(enemy.getPosition(), ' ');
+                    field.setCharAt(enemy.getPosition() + 1, enemy.getSign());
                     playfield = field.toString();
-                    return enemy+1;
+                    return enemy.getPosition() + 1;
                 }
             }
             case 3 -> {
-                if (enemy == 0) {
+                if (enemy.isDead()) {
                     return 0;
-                } else if (playfield.charAt(enemy-41) == '#'  || playfield.charAt(enemy-41) == '@' || playfield.charAt(enemy-41) == 'S') {
+                } else if (playfield.charAt(enemy.getPosition() - 41) == '#' || playfield.charAt(enemy.getPosition() - 41) == '@' || playfield.charAt(enemy.getPosition() - 41) == 'S') {
                     return moveEnemy(enemy);
                 } else {
-                    field.setCharAt(enemy, ' ');
-                    field.setCharAt(enemy - 41, 'X');
+                    field.setCharAt(enemy.getPosition(), ' ');
+                    field.setCharAt(enemy.getPosition() - 41, enemy.getSign());
                     playfield = field.toString();
-                    return enemy - 41;
+                    return enemy.getPosition() - 41;
                 }
             }
             case 4 -> {
-                if (enemy == 0) {
+                if (enemy.isDead()) {
                     return 0;
-                } else if (playfield.charAt(enemy+41) == '#'  || playfield.charAt(enemy+41) == '@' || playfield.charAt(enemy+41) == 'S') {
+                } else if (playfield.charAt(enemy.getPosition() + 41) == '#' || playfield.charAt(enemy.getPosition() + 41) == '@' || playfield.charAt(enemy.getPosition() + 41) == 'S') {
                     return moveEnemy(enemy);
                 } else {
-                    field.setCharAt(enemy, ' ');
-                    field.setCharAt(enemy + 41, 'X');
+                    field.setCharAt(enemy.getPosition(), ' ');
+                    field.setCharAt(enemy.getPosition() + 41, enemy.getSign());
                     playfield = field.toString();
-                    return enemy + 41;
+                    return enemy.getPosition() + 41;
                 }
             }
         }
-        return enemy;
+        return 0;
     }
 
     private void updatePosition(int positionToMove) {

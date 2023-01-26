@@ -1,8 +1,5 @@
 package reisinger.htl;
 
-import Doom.Recources.Rouge;
-import Doom.Recources.Wizard;
-
 public class Main {
 
     public static void main(String[] args) {
